@@ -1,156 +1,136 @@
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onAccountAdded: () => void;
 }
 
-export const AddAccountDialog = ({ open, onOpenChange }: AddAccountDialogProps) => {
-  const [platform, setPlatform] = useState('');
-  const [accountId, setAccountId] = useState('');
-  const [accountName, setAccountName] = useState('');
-  const [accessToken, setAccessToken] = useState('');
+export const AddAccountDialog = ({ open, onOpenChange, onAccountAdded }: AddAccountDialogProps) => {
+  const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
-
-  const addAccountMutation = useMutation({
-    mutationFn: async (data: {
-      platform: string;
-      account_id: string;
-      account_name: string;
-      access_token?: string;
-    }) => {
-      const { error } = await supabase
-        .from('ad_accounts')
-        .insert([data]);
-      
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ad-accounts'] });
-      toast({
-        title: "Account connected",
-        description: "Your ad account has been successfully connected.",
-      });
-      onOpenChange(false);
-      resetForm();
-    },
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to connect ad account. Please check your credentials.",
-        variant: "destructive",
-      });
-    }
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    platform: "",
+    accountId: "",
+    accountName: "",
+    accessToken: ""
   });
 
-  const resetForm = () => {
-    setPlatform('');
-    setAccountId('');
-    setAccountName('');
-    setAccessToken('');
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    addAccountMutation.mutate({
-      platform,
-      account_id: accountId,
-      account_name: accountName,
-      access_token: accessToken || undefined
-    });
-  };
+    if (!user) return;
 
-  const platforms = [
-    { value: 'google_ads', label: 'Google Ads', icon: '🎯' },
-    { value: 'facebook_ads', label: 'Facebook Ads', icon: '📘' },
-    { value: 'instagram_ads', label: 'Instagram Ads', icon: '📷' },
-    { value: 'linkedin_ads', label: 'LinkedIn Ads', icon: '💼' },
-    { value: 'twitter_ads', label: 'Twitter Ads', icon: '🐦' },
-    { value: 'tiktok_ads', label: 'TikTok Ads', icon: '🎵' }
-  ];
+    setIsLoading(true);
+
+    const { error } = await supabase
+      .from('ad_accounts')
+      .insert({
+        user_id: user.id,
+        platform: formData.platform as any,
+        account_id: formData.accountId,
+        account_name: formData.accountName,
+        access_token: formData.accessToken || undefined
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add ad account. Please try again.",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Ad account added successfully!"
+      });
+      setFormData({ platform: "", accountId: "", accountName: "", accessToken: "" });
+      onAccountAdded();
+      onOpenChange(false);
+    }
+
+    setIsLoading(false);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Connect Ad Account</DialogTitle>
+          <DialogTitle>Add Ad Account</DialogTitle>
           <DialogDescription>
-            Add a new advertising platform account to manage with AI optimization
+            Connect your advertising account to start optimizing campaigns.
           </DialogDescription>
         </DialogHeader>
-        
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="platform">Platform</Label>
-            <Select value={platform} onValueChange={setPlatform} required>
+            <Select 
+              value={formData.platform} 
+              onValueChange={(value) => setFormData({...formData, platform: value})}
+              required
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select advertising platform" />
               </SelectTrigger>
               <SelectContent>
-                {platforms.map((p) => (
-                  <SelectItem key={p.value} value={p.value}>
-                    <div className="flex items-center gap-2">
-                      <span>{p.icon}</span>
-                      {p.label}
-                    </div>
-                  </SelectItem>
-                ))}
+                <SelectItem value="google_ads">Google Ads</SelectItem>
+                <SelectItem value="facebook_ads">Facebook Ads</SelectItem>
+                <SelectItem value="instagram_ads">Instagram Ads</SelectItem>
+                <SelectItem value="linkedin_ads">LinkedIn Ads</SelectItem>
+                <SelectItem value="twitter_ads">Twitter Ads</SelectItem>
+                <SelectItem value="tiktok_ads">TikTok Ads</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
-          <div>
-            <Label htmlFor="account-name">Account Name</Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="accountId">Account ID</Label>
             <Input
-              id="account-name"
-              placeholder="Enter a name for this account"
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
+              id="accountId"
+              value={formData.accountId}
+              onChange={(e) => setFormData({...formData, accountId: e.target.value})}
+              placeholder="Enter account ID"
               required
             />
           </div>
-          
-          <div>
-            <Label htmlFor="account-id">Account ID</Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="accountName">Account Name</Label>
             <Input
-              id="account-id"
-              placeholder="Enter your account ID"
-              value={accountId}
-              onChange={(e) => setAccountId(e.target.value)}
+              id="accountName"
+              value={formData.accountName}
+              onChange={(e) => setFormData({...formData, accountName: e.target.value})}
+              placeholder="Enter account name"
               required
             />
           </div>
-          
-          <div>
-            <Label htmlFor="access-token">Access Token (Optional)</Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="accessToken">Access Token (Optional)</Label>
             <Input
-              id="access-token"
+              id="accessToken"
               type="password"
-              placeholder="Enter your API access token"
-              value={accessToken}
-              onChange={(e) => setAccessToken(e.target.value)}
+              value={formData.accessToken}
+              onChange={(e) => setFormData({...formData, accessToken: e.target.value})}
+              placeholder="Enter access token"
             />
-            <p className="text-xs text-gray-500 mt-1">
-              Required for full API integration and automated optimizations
-            </p>
           </div>
-          
-          <div className="flex justify-end gap-2 pt-4">
+
+          <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={addAccountMutation.isPending}>
-              {addAccountMutation.isPending ? 'Connecting...' : 'Connect Account'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Adding..." : "Add Account"}
             </Button>
           </div>
         </form>
