@@ -3,14 +3,23 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Brain, TrendingUp, Target, Zap, Users, BarChart3, Settings, Bell, CreditCard, Shield } from "lucide-react";
-import { AIInsightsCard } from "@/components/AIInsightsCard";
-import { CampaignWizard } from "@/components/CampaignWizard";
-import { PerformanceChart } from "@/components/PerformanceChart";
 import { Header } from "@/components/Header";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard');
+    } else {
+      navigate('/auth');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Header />
@@ -32,8 +41,8 @@ const Index = () => {
             and intelligent insights across all major platforms.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-              Start Free Trial
+            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" onClick={handleGetStarted}>
+              {user ? 'Go to Dashboard' : 'Start Free Trial'}
             </Button>
             <Button size="lg" variant="outline">
               Watch Demo
@@ -242,7 +251,7 @@ const Index = () => {
                     Email support
                   </li>
                 </ul>
-                <Button className="w-full" variant="outline">Get Started</Button>
+                <Button className="w-full" variant="outline" onClick={handleGetStarted}>Get Started</Button>
               </CardContent>
             </Card>
 
@@ -268,7 +277,7 @@ const Index = () => {
                     Priority support
                   </li>
                 </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700">Get Started</Button>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={handleGetStarted}>Get Started</Button>
               </CardContent>
             </Card>
 
@@ -293,7 +302,7 @@ const Index = () => {
                     Dedicated support
                   </li>
                 </ul>
-                <Button className="w-full" variant="outline">Contact Sales</Button>
+                <Button className="w-full" variant="outline" onClick={handleGetStarted}>Contact Sales</Button>
               </CardContent>
             </Card>
           </div>
