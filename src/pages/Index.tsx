@@ -1,4 +1,5 @@
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -196,14 +197,14 @@ const Index = () => {
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h4 className="font-medium">Auto Budget Scaling</h4>
-                        <p className="text-sm text-gray-600">Increase budget by 20% when ROAS > 3.0</p>
+                        <p className="text-sm text-gray-600">Increase budget by 20% when ROAS &gt; 3.0</p>
                       </div>
                       <Badge variant="secondary" className="bg-green-100 text-green-700">Active</Badge>
                     </div>
                     <div className="flex items-center justify-between p-4 border rounded-lg">
                       <div>
                         <h4 className="font-medium">Creative Rotation</h4>
-                        <p className="text-sm text-gray-600">Pause ads with CTR < 1% after 1000 impressions</p>
+                        <p className="text-sm text-gray-600">Pause ads with CTR &lt; 1% after 1000 impressions</p>
                       </div>
                       <Badge variant="secondary" className="bg-green-100 text-green-700">Active</Badge>
                     </div>
