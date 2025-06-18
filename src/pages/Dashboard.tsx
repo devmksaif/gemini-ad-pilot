@@ -1,5 +1,5 @@
 
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { Header } from '@/components/Header';
 import { DashboardStats } from '@/components/dashboard/DashboardStats';
 import { CampaignsList } from '@/components/campaigns/CampaignsList';
@@ -12,7 +12,7 @@ import { AutomationRules } from '@/components/automation/AutomationRules';
 import { BarChart3, Target, Brain, Settings, Link } from 'lucide-react';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
 
   if (!user) {
     return null;
@@ -26,7 +26,7 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
-              Welcome back, {user.user_metadata?.name || user.email}
+              Welcome back, {user.name || user.email}
             </h1>
             <p className="text-gray-600">Manage your AI-powered advertising campaigns</p>
           </div>

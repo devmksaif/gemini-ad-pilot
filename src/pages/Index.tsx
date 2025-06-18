@@ -7,14 +7,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Brain, TrendingUp, Target, Zap, Users, BarChart3, Settings, Bell, CreditCard, Shield } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { PerformanceChart } from "@/components/PerformanceChart";
 import { AIInsightsCard } from "@/components/AIInsightsCard";
 import { CampaignWizard } from "@/components/CampaignWizard";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
 
   const handleGetStarted = () => {
     if (user) {

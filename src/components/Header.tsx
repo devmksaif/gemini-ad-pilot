@@ -1,11 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Brain, Menu } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useNavigate } from "react-router-dom";
 
 export const Header = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useFirebaseAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -44,7 +44,7 @@ export const Header = () => {
             {user ? (
               <>
                 <span className="text-sm text-gray-600 hidden md:inline">
-                  {user.user_metadata?.name || user.email}
+                  {user.name || user.email}
                 </span>
                 <Button variant="ghost" onClick={handleSignOut}>
                   Sign Out
