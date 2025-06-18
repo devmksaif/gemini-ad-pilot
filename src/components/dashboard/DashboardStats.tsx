@@ -3,11 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, DollarSign, Target, Brain } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { getCampaigns } from '@/services/firebase/campaigns';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 export const DashboardStats = () => {
+  const { user } = useFirebaseAuth();
+  
   const { data: campaigns } = useQuery({
-    queryKey: ['campaigns'],
-    queryFn: getCampaigns
+    queryKey: ['campaigns', user?.id],
+    queryFn: () => user ? getCampaigns(user.id) : Promise.resolve([]),
+    enabled: !!user?.id
   });
 
   // Mock performance data for now - in real app this would come from Firebase

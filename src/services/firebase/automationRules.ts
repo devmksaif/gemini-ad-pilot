@@ -53,3 +53,6 @@ export const automationRulesService = {
     await deleteDoc(docRef);
   }
 };
+
+// Export convenience function for easier importing
+export const getAutomationRules = (userId: string) => automationRulesService.getAll(userId);

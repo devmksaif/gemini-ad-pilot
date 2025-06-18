@@ -4,12 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
 import { getCampaigns } from '@/services/firebase/campaigns';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { Plus, TrendingUp, Pause, Play } from 'lucide-react';
+import { Campaign } from '@/types/firebase';
 
 export const CampaignsList = () => {
+  const { user } = useFirebaseAuth();
+  
   const { data: campaigns, isLoading } = useQuery({
-    queryKey: ['campaigns'],
-    queryFn: getCampaigns
+    queryKey: ['campaigns', user?.id],
+    queryFn: () => user ? getCampaigns(user.id) : Promise.resolve([]),
+    enabled: !!user?.id
   });
 
   const getStatusColor = (status: string) => {
@@ -34,6 +39,8 @@ export const CampaignsList = () => {
     );
   }
 
+  const campaignsList: Campaign[] = campaigns || [];
+
   return (
     <Card>
       <CardHeader>
@@ -49,9 +56,9 @@ export const CampaignsList = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {campaigns && campaigns.length > 0 ? (
+        {campaignsList.length > 0 ? (
           <div className="space-y-4">
-            {campaigns.map((campaign) => (
+            {campaignsList.map((campaign) => (
               <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">

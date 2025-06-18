@@ -5,12 +5,17 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useQuery } from '@tanstack/react-query';
 import { getAutomationRules } from '@/services/firebase/automationRules';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { Plus, Settings, TrendingUp, Target, DollarSign, Zap } from 'lucide-react';
+import { AutomationRule } from '@/types/firebase';
 
 export const AutomationRules = () => {
+  const { user } = useFirebaseAuth();
+  
   const { data: rules, isLoading } = useQuery({
-    queryKey: ['automation-rules'],
-    queryFn: getAutomationRules
+    queryKey: ['automation-rules', user?.id],
+    queryFn: () => user ? getAutomationRules(user.id) : Promise.resolve([]),
+    enabled: !!user?.id
   });
 
   const getRuleIcon = (ruleType: string) => {
@@ -23,37 +28,43 @@ export const AutomationRules = () => {
     }
   };
 
-  const mockRules = [
+  const mockRules: AutomationRule[] = [
     {
       id: '1',
+      userId: user?.id || '',
       name: 'Auto Budget Scaling',
       ruleType: 'budget',
       conditions: { roas: { greaterThan: 3.0 } },
       actions: { increaseBudget: 20 },
       isActive: true,
-      description: 'Increase budget by 20% when ROAS > 3.0'
+      createdAt: new Date(),
+      updatedAt: new Date()
     },
     {
-      id: '2', 
+      id: '2',
+      userId: user?.id || '',
       name: 'Creative Rotation',
       ruleType: 'creative',
       conditions: { ctr: { lessThan: 1 }, impressions: { greaterThan: 1000 } },
       actions: { pauseAd: true },
       isActive: true,
-      description: 'Pause ads with CTR < 1% after 1000 impressions'
+      createdAt: new Date(),
+      updatedAt: new Date()
     },
     {
       id: '3',
+      userId: user?.id || '',
       name: 'Bid Optimization',
       ruleType: 'bidding',
       conditions: { cpa: { greaterThan: 50 } },
       actions: { decreaseBid: 10 },
       isActive: false,
-      description: 'Decrease bid by 10% when CPA > $50'
+      createdAt: new Date(),
+      updatedAt: new Date()
     }
   ];
 
-  const displayRules = rules || mockRules;
+  const displayRules: AutomationRule[] = rules && rules.length > 0 ? rules : mockRules;
 
   if (isLoading) {
     return (
@@ -103,7 +114,10 @@ export const AutomationRules = () => {
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600">
-                        {rule.description || 'Custom automation rule'}
+                        {rule.ruleType === 'budget' && 'Increase budget by 20% when ROAS > 3.0'}
+                        {rule.ruleType === 'creative' && 'Pause ads with CTR < 1% after 1000 impressions'}
+                        {rule.ruleType === 'bidding' && 'Decrease bid by 10% when CPA > $50'}
+                        {rule.ruleType === 'targeting' && 'Custom automation rule'}
                       </p>
                     </div>
                   </div>

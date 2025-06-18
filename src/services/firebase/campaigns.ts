@@ -86,3 +86,7 @@ export const campaignsService = {
     await deleteDoc(docRef);
   }
 };
+
+// Export convenience functions for easier importing
+export const getCampaigns = (userId: string) => campaignsService.getAll(userId);
+export const getRecentCampaigns = (userId: string, limit?: number) => campaignsService.getRecent(userId, limit);
