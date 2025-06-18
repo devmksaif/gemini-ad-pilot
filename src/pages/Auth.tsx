@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Mail, Lock, User, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEffect } from 'react';
 
@@ -18,12 +18,12 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user } = useFirebaseAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -51,7 +51,7 @@ const Auth = () => {
     if (error) {
       setError(error.message);
     } else {
-      setMessage('Please check your email for verification link');
+      setMessage('Account created successfully! You are now logged in.');
     }
     setLoading(false);
   };

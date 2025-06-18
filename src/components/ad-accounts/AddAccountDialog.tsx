@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { adAccountsService } from "@/services/firebase/adAccounts";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useToast } from "@/hooks/use-toast";
 
 interface AddAccountDialogProps {
@@ -16,11 +16,11 @@ interface AddAccountDialogProps {
 }
 
 export const AddAccountDialog = ({ open, onOpenChange, onAccountAdded }: AddAccountDialogProps) => {
-  const { user } = useAuth();
+  const { user } = useFirebaseAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    platform: "",
+    platform: "" as 'google_ads' | 'facebook_ads' | 'instagram_ads' | 'linkedin_ads' | 'twitter_ads' | 'tiktok_ads' | "",
     accountId: "",
     accountName: "",
     accessToken: ""
@@ -28,34 +28,34 @@ export const AddAccountDialog = ({ open, onOpenChange, onAccountAdded }: AddAcco
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user || !formData.platform) return;
 
     setIsLoading(true);
 
-    const { error } = await supabase
-      .from('ad_accounts')
-      .insert({
-        user_id: user.id,
-        platform: formData.platform as any,
-        account_id: formData.accountId,
-        account_name: formData.accountName,
-        access_token: formData.accessToken || undefined
+    try {
+      await adAccountsService.create({
+        userId: user.id,
+        platform: formData.platform,
+        accountId: formData.accountId,
+        accountName: formData.accountName,
+        accessToken: formData.accessToken || undefined,
+        isActive: true,
       });
 
-    if (error) {
+      toast({
+        title: "Success",
+        description: "Ad account added successfully!"
+      });
+      
+      setFormData({ platform: "", accountId: "", accountName: "", accessToken: "" });
+      onAccountAdded();
+      onOpenChange(false);
+    } catch (error) {
       toast({
         title: "Error",
         description: "Failed to add ad account. Please try again.",
         variant: "destructive"
       });
-    } else {
-      toast({
-        title: "Success",
-        description: "Ad account added successfully!"
-      });
-      setFormData({ platform: "", accountId: "", accountName: "", accessToken: "" });
-      onAccountAdded();
-      onOpenChange(false);
     }
 
     setIsLoading(false);
@@ -75,7 +75,7 @@ export const AddAccountDialog = ({ open, onOpenChange, onAccountAdded }: AddAcco
             <Label htmlFor="platform">Platform</Label>
             <Select 
               value={formData.platform} 
-              onValueChange={(value) => setFormData({...formData, platform: value})}
+              onValueChange={(value) => setFormData({...formData, platform: value as any})}
               required
             >
               <SelectTrigger>

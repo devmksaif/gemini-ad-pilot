@@ -4,37 +4,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { adAccountsService } from '@/services/firebase/adAccounts';
 import { Plus, ExternalLink, Settings, Trash2 } from 'lucide-react';
 import { AddAccountDialog } from './AddAccountDialog';
 import { useToast } from '@/hooks/use-toast';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 export const AdAccountsManager = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useFirebaseAuth();
 
   const { data: adAccounts, isLoading } = useQuery({
-    queryKey: ['ad-accounts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('ad_accounts')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    }
+    queryKey: ['ad-accounts', user?.id],
+    queryFn: () => user ? adAccountsService.getAll(user.id) : [],
+    enabled: !!user
   });
 
   const deleteAccountMutation = useMutation({
     mutationFn: async (accountId: string) => {
-      const { error } = await supabase
-        .from('ad_accounts')
-        .delete()
-        .eq('id', accountId);
-      
-      if (error) throw error;
+      await adAccountsService.delete(accountId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ad-accounts'] });
@@ -121,13 +111,13 @@ export const AdAccountsManager = () => {
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-medium">{account.account_name}</h4>
-                        <Badge variant={account.is_active ? "default" : "secondary"}>
-                          {account.is_active ? "Active" : "Inactive"}
+                        <h4 className="font-medium">{account.accountName}</h4>
+                        <Badge variant={account.isActive ? "default" : "secondary"}>
+                          {account.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                       <div className="text-sm text-gray-600">
-                        {getPlatformName(account.platform)} • ID: {account.account_id}
+                        {getPlatformName(account.platform)} • ID: {account.accountId}
                       </div>
                     </div>
                   </div>
