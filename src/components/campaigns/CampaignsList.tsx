@@ -3,28 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { getCampaigns } from '@/services/firebase/campaigns';
 import { Plus, TrendingUp, Pause, Play } from 'lucide-react';
 
 export const CampaignsList = () => {
   const { data: campaigns, isLoading } = useQuery({
     queryKey: ['campaigns'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('campaigns')
-        .select(`
-          *,
-          ad_accounts (
-            platform,
-            account_name
-          )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      if (error) throw error;
-      return data;
-    }
+    queryFn: getCampaigns
   });
 
   const getStatusColor = (status: string) => {
@@ -79,9 +64,9 @@ export const CampaignsList = () => {
                     </Badge>
                   </div>
                   <div className="text-sm text-gray-600 flex items-center gap-4">
-                    <span>Budget: ${campaign.budget_daily || 0}/day</span>
-                    <span>Target CPA: ${campaign.target_cpa || 0}</span>
-                    <span>ROAS: {campaign.target_roas || 0}x</span>
+                    <span>Budget: ${campaign.budgetDaily || 0}/day</span>
+                    <span>Target CPA: ${campaign.targetCpa || 0}</span>
+                    <span>ROAS: {campaign.targetRoas || 0}x</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

@@ -2,60 +2,47 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, DollarSign, Target, Brain } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { getCampaigns } from '@/services/firebase/campaigns';
 
 export const DashboardStats = () => {
-  const { data: stats } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: async () => {
-      const { data: campaigns } = await supabase
-        .from('campaigns')
-        .select('*');
-      
-      const { data: performance } = await supabase
-        .from('campaign_performance')
-        .select('*')
-        .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-      
-      const totalSpend = performance?.reduce((sum, p) => sum + (p.spend || 0), 0) || 0;
-      const totalRevenue = performance?.reduce((sum, p) => sum + (p.revenue || 0), 0) || 0;
-      const totalConversions = performance?.reduce((sum, p) => sum + (p.conversions || 0), 0) || 0;
-      const roas = totalSpend > 0 ? totalRevenue / totalSpend : 0;
-
-      return {
-        roas,
-        avgCpa: totalConversions > 0 ? totalSpend / totalConversions : 0,
-        conversions: totalConversions,
-        aiScore: 92
-      };
-    }
+  const { data: campaigns } = useQuery({
+    queryKey: ['campaigns'],
+    queryFn: getCampaigns
   });
+
+  // Mock performance data for now - in real app this would come from Firebase
+  const mockStats = {
+    roas: 4.2,
+    avgCpa: 23.50,
+    conversions: 1247,
+    aiScore: 92
+  };
 
   const statsData = [
     {
       title: 'Total ROAS',
-      value: `${(stats?.roas || 4.2).toFixed(1)}x`,
+      value: `${mockStats.roas.toFixed(1)}x`,
       change: '+12% vs last month',
       icon: TrendingUp,
       color: 'text-green-600'
     },
     {
       title: 'Avg CPA',
-      value: `$${(stats?.avgCpa || 23.50).toFixed(2)}`,
+      value: `$${mockStats.avgCpa.toFixed(2)}`,
       change: '-8% vs last month',
       icon: DollarSign,
       color: 'text-gray-900'
     },
     {
       title: 'Conversions',
-      value: (stats?.conversions || 1247).toLocaleString(),
+      value: mockStats.conversions.toLocaleString(),
       change: '+23% vs last month',
       icon: Target,
       color: 'text-gray-900'
     },
     {
       title: 'AI Score',
-      value: `${stats?.aiScore || 92}/100`,
+      value: `${mockStats.aiScore}/100`,
       change: 'Excellent',
       icon: Brain,
       color: 'text-blue-600'

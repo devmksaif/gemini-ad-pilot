@@ -9,7 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CampaignWizard } from '@/components/CampaignWizard';
 import { AdAccountsManager } from '@/components/ad-accounts/AdAccountsManager';
 import { AutomationRules } from '@/components/automation/AutomationRules';
-import { BarChart3, Target, Brain, Settings, Link } from 'lucide-react';
+import { AIRecommendationSidebar } from '@/components/ai/AIRecommendationSidebar';
+import { PerformanceSimulator } from '@/components/performance/PerformanceSimulator';
+import { CreativeLab } from '@/components/creatives/CreativeLab';
+import { ConversationReporting } from '@/components/reporting/ConversationReporting';
+import { BarChart3, Target, Brain, Settings, Link, Calculator, Palette, MessageSquare } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useFirebaseAuth();
@@ -32,7 +36,7 @@ const Dashboard = () => {
           </div>
 
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-5 mb-8">
+            <TabsList className="grid w-full grid-cols-8 mb-8">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4" />
                 Overview
@@ -43,7 +47,7 @@ const Dashboard = () => {
               </TabsTrigger>
               <TabsTrigger value="accounts" className="flex items-center gap-2">
                 <Link className="w-4 h-4" />
-                Ad Accounts
+                Accounts
               </TabsTrigger>
               <TabsTrigger value="insights" className="flex items-center gap-2">
                 <Brain className="w-4 h-4" />
@@ -53,16 +57,31 @@ const Dashboard = () => {
                 <Settings className="w-4 h-4" />
                 Automation
               </TabsTrigger>
+              <TabsTrigger value="simulator" className="flex items-center gap-2">
+                <Calculator className="w-4 h-4" />
+                Simulator
+              </TabsTrigger>
+              <TabsTrigger value="creative" className="flex items-center gap-2">
+                <Palette className="w-4 h-4" />
+                Creative Lab
+              </TabsTrigger>
+              <TabsTrigger value="reporting" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                AI Reports
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-6">
               <DashboardStats />
-              <div className="grid lg:grid-cols-3 gap-6">
+              <div className="grid lg:grid-cols-4 gap-6">
                 <div className="lg:col-span-2">
                   <PerformanceChart />
                 </div>
                 <div>
                   <AIInsightsCard />
+                </div>
+                <div>
+                  <AIRecommendationSidebar />
                 </div>
               </div>
               <CampaignsList />
@@ -77,14 +96,38 @@ const Dashboard = () => {
             </TabsContent>
 
             <TabsContent value="insights">
-              <div className="grid md:grid-cols-2 gap-6">
-                <AIInsightsCard />
-                <AIInsightsCard />
+              <div className="grid lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 grid md:grid-cols-2 gap-6">
+                  <AIInsightsCard />
+                  <AIInsightsCard />
+                </div>
+                <div>
+                  <AIRecommendationSidebar />
+                </div>
               </div>
             </TabsContent>
 
             <TabsContent value="automation">
               <AutomationRules />
+            </TabsContent>
+
+            <TabsContent value="simulator">
+              <PerformanceSimulator />
+            </TabsContent>
+
+            <TabsContent value="creative">
+              <CreativeLab />
+            </TabsContent>
+
+            <TabsContent value="reporting">
+              <div className="grid lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <ConversationReporting />
+                </div>
+                <div>
+                  <AIRecommendationSidebar />
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

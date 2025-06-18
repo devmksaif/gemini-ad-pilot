@@ -4,21 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { getAutomationRules } from '@/services/firebase/automationRules';
 import { Plus, Settings, TrendingUp, Target, DollarSign, Zap } from 'lucide-react';
 
 export const AutomationRules = () => {
   const { data: rules, isLoading } = useQuery({
     queryKey: ['automation-rules'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('automation_rules')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    }
+    queryFn: getAutomationRules
   });
 
   const getRuleIcon = (ruleType: string) => {
@@ -35,28 +27,28 @@ export const AutomationRules = () => {
     {
       id: '1',
       name: 'Auto Budget Scaling',
-      rule_type: 'budget',
-      conditions: { roas: { greater_than: 3.0 } },
-      actions: { increase_budget: 20 },
-      is_active: true,
+      ruleType: 'budget',
+      conditions: { roas: { greaterThan: 3.0 } },
+      actions: { increaseBudget: 20 },
+      isActive: true,
       description: 'Increase budget by 20% when ROAS > 3.0'
     },
     {
       id: '2', 
       name: 'Creative Rotation',
-      rule_type: 'creative',
-      conditions: { ctr: { less_than: 1 }, impressions: { greater_than: 1000 } },
-      actions: { pause_ad: true },
-      is_active: true,
+      ruleType: 'creative',
+      conditions: { ctr: { lessThan: 1 }, impressions: { greaterThan: 1000 } },
+      actions: { pauseAd: true },
+      isActive: true,
       description: 'Pause ads with CTR < 1% after 1000 impressions'
     },
     {
       id: '3',
       name: 'Bid Optimization',
-      rule_type: 'bidding',
-      conditions: { cpa: { greater_than: 50 } },
-      actions: { decrease_bid: 10 },
-      is_active: false,
+      ruleType: 'bidding',
+      conditions: { cpa: { greaterThan: 50 } },
+      actions: { decreaseBid: 10 },
+      isActive: false,
       description: 'Decrease bid by 10% when CPA > $50'
     }
   ];
@@ -96,7 +88,7 @@ export const AutomationRules = () => {
         {displayRules.length > 0 ? (
           <div className="space-y-4">
             {displayRules.map((rule) => {
-              const IconComponent = getRuleIcon(rule.rule_type);
+              const IconComponent = getRuleIcon(rule.ruleType);
               return (
                 <div key={rule.id} className="flex items-center justify-between p-4 border rounded-lg">
                   <div className="flex items-center gap-4">
@@ -106,8 +98,8 @@ export const AutomationRules = () => {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <h4 className="font-medium">{rule.name}</h4>
-                        <Badge variant={rule.is_active ? "default" : "secondary"}>
-                          {rule.is_active ? "Active" : "Inactive"}
+                        <Badge variant={rule.isActive ? "default" : "secondary"}>
+                          {rule.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600">
@@ -116,7 +108,7 @@ export const AutomationRules = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
-                    <Switch checked={rule.is_active} />
+                    <Switch checked={rule.isActive} />
                     <Button variant="outline" size="sm">
                       <Settings className="w-4 h-4 mr-2" />
                       Edit
