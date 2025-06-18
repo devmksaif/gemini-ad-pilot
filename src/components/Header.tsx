@@ -1,69 +1,64 @@
 
 import { Button } from "@/components/ui/button";
-import { Brain, Menu } from "lucide-react";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useNavigate } from "react-router-dom";
+import { LogOut, User, Settings } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Header = () => {
   const { user, signOut } = useFirebaseAuth();
-  const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    try {
+      await signOut();
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-200 z-50">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="w-8 h-8 text-blue-600" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              AdOptimize AI
-            </span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">AI</span>
+            </div>
+            <h1 className="text-xl font-bold text-gray-900">
+              Ad Optimizer
+            </h1>
           </div>
-          
-          {user ? (
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="#dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">Dashboard</a>
-              <a href="#campaigns" className="text-gray-600 hover:text-gray-900 transition-colors">Campaigns</a>
-              <a href="#insights" className="text-gray-600 hover:text-gray-900 transition-colors">AI Insights</a>
-              <a href="#automation" className="text-gray-600 hover:text-gray-900 transition-colors">Automation</a>
-            </nav>
-          ) : (
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">Features</a>
-              <a href="#pricing" className="text-gray-600 hover:text-gray-900 transition-colors">Pricing</a>
-              <a href="#about" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
-              <a href="#contact" className="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
-            </nav>
+
+          {user && (
+            <div className="flex items-center gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-2 px-3">
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
+                        {user.name?.charAt(0) || user.email?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm">{user.name || user.email}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem>
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           )}
-          
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <span className="text-sm text-gray-600 hidden md:inline">
-                  {user.name || user.email}
-                </span>
-                <Button variant="ghost" onClick={handleSignOut}>
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="ghost" className="hidden md:inline-flex" onClick={() => navigate('/auth')}>
-                  Sign In
-                </Button>
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" onClick={() => navigate('/auth')}>
-                  Get Started
-                </Button>
-              </>
-            )}
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="w-5 h-5" />
-            </Button>
-          </div>
         </div>
       </div>
     </header>
