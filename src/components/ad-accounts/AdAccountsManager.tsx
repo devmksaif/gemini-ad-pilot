@@ -52,6 +52,10 @@ export const AdAccountsManager = () => {
     }
   });
 
+  const handleAccountAdded = () => {
+    queryClient.invalidateQueries({ queryKey: ['ad-accounts'] });
+  };
+
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case 'google_ads': return '🎯';
@@ -168,6 +172,7 @@ export const AdAccountsManager = () => {
       <AddAccountDialog 
         open={showAddDialog} 
         onOpenChange={setShowAddDialog}
+        onAccountAdded={handleAccountAdded}
       />
     </>
   );
